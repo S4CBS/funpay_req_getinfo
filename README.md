@@ -5,7 +5,8 @@
 - /messages (only count of messages)
 - /trades (only count of trades)
 
-```Libraries
+# Lib
+```
 pip install requests, beautifulsoup4
 ```
 
