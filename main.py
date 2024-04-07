@@ -1,4 +1,4 @@
-from info.req import get_info, site_status
+from info.req import get_info, site_status, get_rating
 import telebot
 
 try:
@@ -16,24 +16,26 @@ bot = telebot.TeleBot(token=tk)
 
 start_message = """Доступные команды:
 /status - Статус сайта
-/messages - Сообщения {количество}
-/trades - Продажи {количество}
 /info - Полная информация
 ..."""
 
 def fetch_info():
     try:
-        chat, trade, name, lang = get_info("ru")
+        chat, trade, name, lang, balance, orders, href = get_info("ru")
     except:
         try:
-            chat, trade, name, lang = get_info("en")
+            chat, trade, name, lang, balance, orders, href = get_info("en")
         except:
-            chat, trade, name, lang = get_info("uk")
+            chat, trade, name, lang, balance, orders, href = get_info("uk")
+
+    rating, reg_date, rating_full_count = get_rating()
 
     edit_chat = ''.join([x for x in chat if x.isdigit()])
     edit_trades = ''.join([x for x in trade if x.isdigit()])
+    edit_balance = ''.join([x for x in balance if x.isdigit()])
+    edit_orders = ''.join([x for x in orders if x.isdigit()])
 
-    return edit_chat, edit_trades, name, lang
+    return edit_chat, edit_trades, name, lang, edit_balance, edit_orders, href, rating, reg_date, rating_full_count
 
 @bot.message_handler(commands=['status'])
 def check_status(message):
@@ -44,20 +46,10 @@ def check_status(message):
 def start_cm(message):
     bot.send_message(message.chat.id, start_message)
 
-@bot.message_handler(commands=['messages'])
-def messages_cm(message):
-    edit_chat, _, _, _ = fetch_info()
-    bot.send_message(message.chat.id, f"Сообщения: {edit_chat}")
-
-@bot.message_handler(commands=['trades'])
-def trades_cm(message):
-    _, edit_trades, _, _ = fetch_info()
-    bot.send_message(message.chat.id, f"Продажи: {edit_trades}")
-
 @bot.message_handler(commands=['info'])
 def info_cm(message):
-    edit_chat, edit_trades, name, lang = fetch_info()
-    bot.send_message(message.chat.id, f"Имя пользователя: {name}\nПродажи: {edit_trades}\nСообщения: {edit_chat}\nЯзык: {lang}")
+    edit_chat, edit_trades, name, lang, edit_balance, edit_orders, href, rating, reg_date, rating_full_count = fetch_info()
+    bot.send_message(message.chat.id, f"Имя пользователя: {name}\nСсылка на профиль: {href}\nПродажи: {edit_trades}\nСообщения: {edit_chat}\nЯзык: {lang}\nФинансы: {edit_balance}\nПокупки: {edit_orders}\nРейтинг: {rating}\nДата регистрации: \n{reg_date}\nКоличество отзывов: {rating_full_count}")
 
 bot.polling(True)
 
