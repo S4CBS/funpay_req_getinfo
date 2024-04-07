@@ -7,8 +7,15 @@
 
 # Lib
 ```
-pip install requests, beautifulsoup4
+pip install requests, beautifulsoup4, schedule
 ```
+# How to use?
+
+- First Run main.py,
+- Enter Tg-bot token,
+- Use /start commnad in chat,
+- Enter golden-token from funpay.com,
+- end.
 
 # END
 You can to refine this program for your self.
