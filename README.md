@@ -7,7 +7,7 @@
 
 # Lib
 ```
-pip install requests, beautifulsoup4
+pip install requests, beautifulsoup4, schedule
 ```
 # How to use?
 
