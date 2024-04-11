@@ -1,4 +1,4 @@
-from info.req import get_info, site_status, get_rating, getAvatar
+from info.req import get_info, site_status, get_rating, getAvatar, chat_new_notif
 import telebot
 import os
 import schedule
@@ -29,11 +29,19 @@ def fetch_info():
             chat, trade, name, lang, balance, orders, href, valuta = get_info("uk")
     rating, reg_date, rating_full_count = get_rating()
     avatar = getAvatar()
+    mess, results = chat_new_notif()
     edit_chat = ''.join([x for x in chat if x.isdigit()])
     edit_trades = ''.join([x for x in trade if x.isdigit()])
     edit_balance = ''.join([x for x in balance if x.isdigit()])
     edit_orders = ''.join([x for x in orders if x.isdigit()])
-    return edit_chat, edit_trades, name, lang, edit_balance, edit_orders, href, rating, reg_date, rating_full_count, valuta, avatar
+    try:
+        if edit_balance == "":
+            edit_balance = 0
+        else:
+            pass
+    except:
+        pass
+    return edit_chat, edit_trades, name, lang, edit_balance, edit_orders, href, rating, reg_date, rating_full_count, valuta, avatar, mess, results
 @bot.message_handler(commands=['status'])
 def check_status(message):
     status = site_status()
@@ -43,21 +51,18 @@ def start_cm(message):
     bot.send_message(message.chat.id, start_message)
 @bot.message_handler(commands=['info'])
 def info_cm(message):
-    edit_chat, edit_trades, name, lang, edit_balance, edit_orders, href, rating, reg_date, rating_full_count, valuta, avatar = fetch_info()
-    bot.send_message(message.chat.id, f"Имя пользователя: {name}\nСсылка на профиль: {href}\nАватар: {avatar}\nПродажи: {edit_trades}\nСообщения: {edit_chat}\nЯзык: {lang}\nФинансы: {edit_balance} - Валюта {valuta}\nПокупки: {edit_orders}\nРейтинг: {rating}\nДата регистрации: \n{reg_date}\nКоличество отзывов: {rating_full_count}\n")
+    _, edit_trades, name, lang, edit_balance, edit_orders, href, rating, reg_date, rating_full_count, valuta, avatar, mess, _ = fetch_info()
+    bot.send_message(message.chat.id, f"Имя пользователя: {name}\nСсылка на профиль: {href}\nАватар: {avatar}\nПродажи: {edit_trades}\nСообщения: {mess}\nЯзык: {lang}\nФинансы: {edit_balance} - Валюта {valuta}\nПокупки: {edit_orders}\nРейтинг: {rating}\nДата регистрации: \n{reg_date}\nКоличество отзывов: {rating_full_count}\n")
 #Проверка на новые сообщения
 def newMes():
     global counter
-    edit_chat, *_ = fetch_info()
-    edit_chat = int(edit_chat)
-
-    if edit_chat > counter: # 1 0
-        bot.send_message(chat_id="YOUR CHATID", text="У вас новое сообщение!")
-        counter = edit_chat # 1 1
+    *_, mess, res = fetch_info()
+    if mess > counter: # 1 0
+        for user_name,message,time in res:
+            bot.send_message(chat_id="Сюда свой chat_id|YOUR chat_id", text=f"У вас новое сообщение!\nКоличество сообщений - {mess}\nСодержание сообщения:\nUsername: {user_name}\nMessage: {message}\nTime: {time}")
+        counter = mess # 1 1
     else:
-        counter = edit_chat
-    
-
+        counter = mess
 def polling_thread():
     while True:
         try:
@@ -70,7 +75,7 @@ bot_thread = threading.Thread(target=polling_thread)
 bot_thread.daemon = True
 bot_thread.start()
 # Запуск планировщика для выполнения функции newMes каждую минуту
-schedule.every(15).seconds.do(newMes)
+schedule.every(30).seconds.do(newMes)
 print("Бот запущен!")
 # Бесконечный цикл для выполнения планировщика
 while True:

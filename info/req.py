@@ -139,3 +139,54 @@ def getAvatar(href=get_href_url()):
                     # Извлекаем ссылку из найденного совпадения
                     avatar_url = matches.group(1)
     return avatar_url
+def chat_url(language):
+    if language == "ru":
+        url = "https://funpay.com/chat/"
+    elif language == "en":
+        url = "https://funpay.com/en/chat/"
+    elif language == "uk":
+        url = "https://funpay.com/uk/chat/"
+    return url
+def chat_new_notif():
+    results = []
+    try:
+        with open("config.cfg", 'r') as file:
+            golden_key = file.read()
+            golden_key = golden_key.replace("golden_key=", '')
+    except FileNotFoundError:
+        golden_key = input("Введите ваш golden_key: ")
+        with open("config.cfg", 'w') as file:
+            file.write("golden_key="+golden_key)
+            file.close()
+    try:
+        url = chat_url("ru")
+    except:
+        try:
+            url = chat_url("en")
+        except:
+            url = chat_url("uk")
+    headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
+            "Cookie": f"golden_key={golden_key}"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, "html.parser")
+        unread = soup.find_all("a", class_="unread")
+            
+        for item in unread:
+            user_name_elem = item.find(class_="media-user-name")
+            message_elem = item.find(class_="contact-item-message")
+            time_elem = item.find(class_="contact-item-time")
+            
+            if user_name_elem and message_elem and time_elem:
+                user_name = user_name_elem.get_text(strip=True)
+                message = message_elem.get_text(strip=True)
+                time = time_elem.get_text(strip=True)
+                
+                results.append((user_name,message,time))
+
+        if unread != []:
+            return len(unread), results
+        else:
+            return 0, results
