@@ -64,7 +64,6 @@ def newMes():
                 mess_check.add(data_node_msg)
             except Exception as e:
                 print(e)
-    print(".")
 def polling_thread():
     while True:
         try:
