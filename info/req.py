@@ -173,18 +173,19 @@ def chat_new_notif():
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
         unread = soup.find_all("a", class_="unread")
-            
+
         for item in unread:
             user_name_elem = item.find(class_="media-user-name")
             message_elem = item.find(class_="contact-item-message")
             time_elem = item.find(class_="contact-item-time")
-            
+            data_node_msg = item.get("data-node-msg", "")
+        
             if user_name_elem and message_elem and time_elem:
                 user_name = user_name_elem.get_text(strip=True)
                 message = message_elem.get_text(strip=True)
                 time = time_elem.get_text(strip=True)
                 
-                results.append((user_name,message,time))
+                results.append((user_name,message,time, data_node_msg))
 
         if unread != []:
             return len(unread), results

@@ -3,7 +3,7 @@ import telebot
 import os
 import schedule
 import threading, time
-counter = 0
+mess_check = set()
 os.system("cls")
 try:
     with open("config_tg.cfg", 'r') as file:
@@ -55,14 +55,16 @@ def info_cm(message):
     bot.send_message(message.chat.id, f"Имя пользователя: {name}\nСсылка на профиль: {href}\nАватар: {avatar}\nПродажи: {edit_trades}\nСообщения: {mess}\nЯзык: {lang}\nФинансы: {edit_balance} - Валюта {valuta}\nПокупки: {edit_orders}\nРейтинг: {rating}\nДата регистрации: \n{reg_date}\nКоличество отзывов: {rating_full_count}\n")
 #Проверка на новые сообщения
 def newMes():
-    global counter
+    global mess_check
     *_, mess, res = fetch_info()
-    if mess > counter: # 1 0
-        for user_name,message,time in res:
-            bot.send_message(chat_id="Сюда свой chat_id|YOUR chat_id", text=f"У вас новое сообщение!\nКоличество сообщений - {mess}\nСодержание сообщения:\nUsername: {user_name}\nMessage: {message}\nTime: {time}")
-        counter = mess # 1 1
-    else:
-        counter = mess
+    for user_name,message,time, data_node_msg in res:
+        if data_node_msg not in mess_check:
+            try:
+                bot.send_message(chat_id="2082879504", text=f"У вас новое сообщение!\nUsername: {user_name}\nMessage: {message}\nTime: {time}")
+                mess_check.add(data_node_msg)
+            except Exception as e:
+                print(e)
+    print(".")
 def polling_thread():
     while True:
         try:
