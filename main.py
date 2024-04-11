@@ -60,7 +60,7 @@ def newMes():
     for user_name,message,time, data_node_msg in res:
         if data_node_msg not in mess_check:
             try:
-                bot.send_message(chat_id="2082879504", text=f"У вас новое сообщение!\nUsername: {user_name}\nMessage: {message}\nTime: {time}")
+                bot.send_message(chat_id="Свой chat_id", text=f"У вас новое сообщение!\nUsername: {user_name}\nMessage: {message}\nTime: {time}")
                 mess_check.add(data_node_msg)
             except Exception as e:
                 print(e)
@@ -75,7 +75,6 @@ def polling_thread():
 bot_thread = threading.Thread(target=polling_thread)
 bot_thread.daemon = True
 bot_thread.start()
-# Запуск планировщика для выполнения функции newMes каждую минуту
 schedule.every(30).seconds.do(newMes)
 print("Бот запущен!")
 # Бесконечный цикл для выполнения планировщика
