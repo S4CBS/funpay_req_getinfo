@@ -29,7 +29,7 @@ def get_start_info():
     return tk, chat_id, golden_key
 *_, golden_key = get_start_info()
 def site_status():
-    url = "https://funpay.com/orders/trade"
+    url = "https://funpay.com"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
         "Cookie": f"golden_key={golden_key}"
@@ -39,16 +39,12 @@ def site_status():
 def get_info(language):
     if language != 'ru':
         url = f"https://funpay.com/{language}/orders/trade" if language else "https://funpay.com/orders/trade"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
-            "Cookie": f"golden_key={golden_key}"
-        }
     else:
         url = "https://funpay.com/orders/"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
-            "Cookie": f"golden_key={golden_key}"
-        }
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
+        "Cookie": f"golden_key={golden_key}"
+    }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -101,8 +97,7 @@ def get_rating(href=get_href_url()):
         soup = BeautifulSoup(response.content, "html.parser")
         big = soup.find("span", class_="big")
         text_nowrap = soup.find("div", class_="text-nowrap")
-        rating_full_count = soup.find("div", class_="rating-full-count")
-        # tc_item = soup.find("div", class_="tc-desc-text") Предметы на продаже
+        rating_full_count = soup.find("div", class_="mb5")
         if big:
             rating = big.text.strip()
         if text_nowrap:
@@ -150,28 +145,58 @@ def chat_new_notif():
         except:
             url = chat_url("uk")
     headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
-            "Cookie": f"golden_key={golden_key}"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
+        "Cookie": f"golden_key={golden_key}"
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
         unread = soup.find_all("a", class_="unread")
-
         for item in unread:
             user_name_elem = item.find(class_="media-user-name")
             message_elem = item.find(class_="contact-item-message")
             time_elem = item.find(class_="contact-item-time")
             data_node_msg = item.get("data-node-msg", "")
-        
             if user_name_elem and message_elem and time_elem:
                 user_name = user_name_elem.get_text(strip=True)
                 message = message_elem.get_text(strip=True)
                 time = time_elem.get_text(strip=True)
-                
                 results.append((user_name,message,time, data_node_msg))
-
         if unread != []:
             return len(unread), results
         else:
             return 0, results
+def tc_url(language):
+    if language == "ru":
+        url = "https://funpay.com/orders/trade?id=&buyer=&state=paid&game="
+    elif language == "en":
+        url = "https://funpay.com/en/orders/trade?id=&buyer=&state=paid&game="
+    elif language == "uk":
+        url = "https://funpay.com/uk/orders/trade?id=&buyer=&state=paid&game="
+    return url
+def get_tc_status():
+    try:
+        url = tc_url("ru")
+    except:
+        try:
+            url = tc_url("en")
+        except:
+            url = tc_url('uk')
+    res_list = []
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36",
+        "Cookie": f"golden_key={golden_key}"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, "html.parser")
+        tc_item = soup.find_all("a", class_="tc-item")
+        for item in tc_item:
+            href = item['href']
+            tc_date_time = item.find(class_="tc-date-time").text.strip()
+            tc_order = item.find(class_="tc-order").text.strip()
+            tc_user = item.find(class_="tc-user").text.strip().replace("\n\n", " ")
+            tc_status = item.find(class_="tc-status").text.strip()
+            if href and tc_date_time and tc_order and tc_user and tc_status:
+                res_list.append((href, tc_date_time, tc_order, tc_user, tc_status))
+    return res_list
