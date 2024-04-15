@@ -3,6 +3,9 @@
 - /start (list of commands)
 - /info (all info about account)
 - /status
+- /send_message [id] message
+- /send_image [id] -> Enter -> loading image
+- /seen
 
 # Lib
 ```
@@ -25,10 +28,13 @@ You can to refine this program for your self.
 Only the Russian translation. In the program itself. (In the development of adding English)
 
 ## TG-бот для разбора любой информации из funpay.com (Русский язык)
-# Команд
+# Команды
 - /start (список команд)
 - /info (вся информация об учетной записи)
 - /status
+- /send_message [id] сообщение
+- /send_image [id]  -> Enter -> Загрузить картинку.
+- /seen - база прочитаных заказов. (seen.cfg)
 
 # Lib
 ```
