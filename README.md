@@ -6,7 +6,7 @@
 
 # Lib
 ```
-pip install requests, beautifulsoup4, schedule, pytelegrambotapi
+pip install requests, beautifulsoup4, schedule, pytelegrambotapi, FunPayAPI, pillow
 ```
 # How to use?
 
@@ -32,7 +32,7 @@ Only the Russian translation. In the program itself. (In the development of addi
 
 # Lib
 ```
-pip install requests, beautifulsoup4, schedule, pytelegrambotapi
+pip install requests, beautifulsoup4, schedule, pytelegrambotapi, FunPayAPI, pillow
 ```
 # Как пользоваться?
 
