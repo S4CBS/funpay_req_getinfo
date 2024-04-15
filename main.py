@@ -17,23 +17,27 @@ def seen_try():
     except FileNotFoundError:
         seen = {}
     return seen
-st_start = "Уведомления о заказах=True\nУведомление о новых сообщениях=True"
-try:
-    with open("settings.cfg", 'r', encoding='utf-8') as f:
-        settings_list = f.readlines()
-        try:
-            order_message = settings_list[1].split("=")[1].split("\n")[0]
-            order_message = bool(order_message)
-        except:
-            pass
-        try:
-            new_messages = settings_list[2].split("=")[1].split("\n")[0]
-            new_messages = bool(new_messages)
-        except:
-            pass
-except FileNotFoundError as e:
-    with open("settings.cfg", 'w', encoding="utf-8") as f:
-        f.write(st_start)
+def nw_or_ms():
+    st_start = "Уведомления о заказах=True\nУведомление о новых сообщениях=True"
+    try:
+        with open("settings.cfg", 'r', encoding='utf-8') as f:
+            settings_list = f.readlines()
+            try:
+                order_message = settings_list[0].split("=")[1].split("\n")[0]
+                order_message = bool(order_message)
+            except:
+                pass
+            try:
+                new_QWmessages = settings_list[1].split("=")[1].split("\n")[0]
+                new_QWmessages = bool(new_QWmessages)
+            except:
+                pass
+    except FileNotFoundError as e:
+        with open("settings.cfg", 'w', encoding="utf-8") as f:
+            f.write(st_start)
+        order_message = True
+        new_QWmessages = True
+    return order_message, new_QWmessages
 tk, chat_id, golden_key = get_start_info()
 mess_check = set()
 tc_order_check = set()
@@ -78,8 +82,9 @@ def send_message_cm(message):
     command = message.text.split()
     if len(command) < 3:
         bot.send_message(message.chat.id, "Неправильный формат команды. Используйте /send_message [chat_id] сообщение")
-    user_id = command[1]
-    text = ' '.join(command[2:])
+    else:
+        user_id = command[1]
+        text = ' '.join(command[2:])
     try:
         acc = Account(golden_key).get()
         acc.send_message(chat_id=user_id, text=text)
@@ -123,24 +128,27 @@ def info_cm(message):
 @bot.message_handler(commands=['seen'])
 def seen_order_cm(message):
     command = message.text.split()
-    if len(command) < 2:
-        print("Неверный формат команды. Используйте /seen [Номер заказа]")
-    sn_order = command[1]
-    sn_check = seen_try()
-    with open("seen.cfg", "a", encoding="utf-8") as f:
+    try:
+        if len(command) < 2:
+            bot.send_message(message.chat.id, text="Неверный формат команды. Используйте /seen [Номер заказа]")
+        else:
+            sn_order = command[1]
+        sn_check = seen_try()
+        with open("seen.cfg", "a", encoding="utf-8") as f:
+            if sn_order not in sn_check:
+                f.write(sn_order+"\n")
         if sn_order not in sn_check:
-            f.write(sn_order+"\n")
-    if sn_order not in sn_check:
-        bot.send_message(message.chat.id, text=f"Теперь номер заказа {sn_order} в списке прочитанных.")
-    else:
-        bot.send_message(message.chat.id, text=f"Номер заказа {sn_order} уже в списке прочитанных.")
-    seen_try()
+            bot.send_message(message.chat.id, text=f"Теперь номер заказа {sn_order} в списке прочитанных.")
+        else:
+            bot.send_message(message.chat.id, text=f"Номер заказа {sn_order} уже в списке прочитанных.")
+        seen_try()
+    except Exception as e:
+        pass
 #Проверка на новые сообщения и продажи
 def newMes():
+    order_message, new_messages = nw_or_ms()
     global mess_check
     global tc_order_check
-    global new_messages
-    global order_message
     seen = seen_try()
     *_, res, res_list = fetch_info()
     for user_name,message,time, data_node_msg, id_chat in res:
@@ -168,7 +176,7 @@ def polling_thread():
         try:
             bot.polling(none_stop=True)
         except Exception as e:
-            print(f"Ошибка в работе бота: {e}")
+            print(e)
             time.sleep(10)
 # Запуск бота в отдельном потоке
 bot_thread = threading.Thread(target=polling_thread)
