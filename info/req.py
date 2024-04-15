@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import os
 def get_start_info():
     try:
         with open("config.cfg", "r", encoding="utf-8") as f:
@@ -26,6 +27,7 @@ def get_start_info():
         golden_key = input("Введите ваш golden_key с сайта funpay.com: ")
         with open("config.cfg", "w", encoding="utf-8") as f:
             f.write(f"""token={tk}\nchat_id={chat_id}\ngolden_key={golden_key}""")
+    os.system("cls")
     return tk, chat_id, golden_key
 *_, golden_key = get_start_info()
 def site_status():
@@ -156,12 +158,13 @@ def chat_new_notif():
             user_name_elem = item.find(class_="media-user-name")
             message_elem = item.find(class_="contact-item-message")
             time_elem = item.find(class_="contact-item-time")
-            data_node_msg = item.get("data-node-msg", "")
+            data_node_msg = item.get("data-node-msg")
+            data_id = item.get("data-id")
             if user_name_elem and message_elem and time_elem:
                 user_name = user_name_elem.get_text(strip=True)
                 message = message_elem.get_text(strip=True)
                 time = time_elem.get_text(strip=True)
-                results.append((user_name,message,time, data_node_msg))
+                results.append((user_name,message,time, data_node_msg, data_id))
         if unread != []:
             return len(unread), results
         else:
@@ -197,6 +200,18 @@ def get_tc_status():
             tc_order = item.find(class_="tc-order").text.strip()
             tc_user = item.find(class_="tc-user").text.strip().replace("\n\n", " ")
             tc_status = item.find(class_="tc-status").text.strip()
+            try:
+                order_response = requests.get(href, headers=headers)
+                if order_response.status_code == 200:
+                    order_soup = BeautifulSoup(order_response.content, "html.parser")
+                    chat_div = order_soup.find("div", class_="chat")
+                    if chat_div:
+                        chat_id = chat_div['data-id']
+                    else:
+                        chat_id = None
+            except Exception as e:
+                print(f"Ошибка при получении chat_id для заказа {tc_order}: {e}")
+                chat_id = None
             if href and tc_date_time and tc_order and tc_user and tc_status:
-                res_list.append((href, tc_date_time, tc_order, tc_user, tc_status))
+                res_list.append((href, tc_date_time, tc_order, tc_user, tc_status, chat_id))
     return res_list
