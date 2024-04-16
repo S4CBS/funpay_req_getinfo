@@ -55,3 +55,5 @@ pip install requests, beautifulsoup4, schedule, pytelegrambotapi, FunPayAPI, pil
 # END
 Вы можете доработать эту программу для себя.
 Только русский перевод. В самой программе. (В разработке добавления Английского)
+
+# By https://funpay.com/users/3833888/ aka S4CBS.
