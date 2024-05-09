@@ -77,7 +77,7 @@ def fetch_info():
 def check_status(message):
     status = site_status()
     bot.send_message(message.chat.id, status)
-@bot.message_handler(commands=['send_message'])
+@bot.message_handler(commands=['send_message', 'sm'])
 def send_message_cm(message):
     command = message.text.split()
     if len(command) < 3:
@@ -87,10 +87,10 @@ def send_message_cm(message):
         text = ' '.join(command[2:])
     try:
         acc = Account(golden_key).get()
-        acc.send_message(chat_id=user_id, text=text)
+        acc.send_message(chat_id=user_id, text="@BOT@: " + text)
     except:
         pass
-@bot.message_handler(commands=['send_image'])
+@bot.message_handler(commands=['send_image', 'si'])
 def send_image_cm(message):
     command_parts = message.text.split()
     if len(command_parts) < 2:
@@ -161,13 +161,18 @@ def newMes():
                     pass
             except Exception as e:
                 print(e)
-    for href, tc_date_time, tc_order, tc_user, tc_status, id_chat_ord in res_list:
+    for href, tc_date_time, tc_order, tc_user, tc_status, id_chat_ord, quant_part in res_list:
         if tc_order not in tc_order_check and tc_order not in seen:
             try:
                 if order_message is True:
-                    bot.send_message(chat_id=chat_id, text=f"У вас новый заказ!\nСсылка: {href}\nНомер заказа: {tc_order}\nВремя: {tc_date_time}\nПользователь: {tc_user}\nСтатус: {tc_status}\nChat_id: {id_chat_ord}")
+                    bot.send_message(chat_id=chat_id, text=f"У вас новый заказ!\nСсылка: {href}\nНомер заказа: {tc_order}\nВремя: {tc_date_time}\nПользователь: {tc_user}\nКоличество: {quant_part}\nСтатус: {tc_status}\nChat_id: {id_chat_ord}")
                     tc_order_check.add(tc_order)
-                elif order_message is False:
+                    try:
+                        acc = Account(golden_key=golden_key, user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36").get()
+                        acc.send_message(chat_id=id_chat_ord, text="@BOT@: Спасибо за покупку, продавец получит уведомление о заказе в течение 30 секунд.")
+                    except Exception as e:
+                        pass
+                else:
                     pass
             except Exception as e:
                 print(e)

@@ -204,7 +204,27 @@ def get_tc_status():
                 order_response = requests.get(href, headers=headers)
                 if order_response.status_code == 200:
                     order_soup = BeautifulSoup(order_response.content, "html.parser")
+                    chat_msg_text = order_soup.find_all("div",class_="chat-msg-text")
                     chat_div = order_soup.find("div", class_="chat")
+                    try:
+                        for x in chat_msg_text:
+                            if "оплатил заказ" in x.text:
+                                last_order_count = x
+                    except:
+                        pass
+                    if chat_msg_text:
+                        ssoup = BeautifulSoup(str(last_order_count), "html.parser")
+                        div_element = ssoup.find('div', class_='chat-msg-text')
+                        if div_element:
+                            text_content = div_element.get_text().strip()
+                            parts = text_content.split(',')
+                            quantity_part = None
+                            for part in parts:
+                                if 'шт.' in part:
+                                    quantity_part = part.strip().split(".")[0]
+                                    break
+                                if quantity_part is None or "":
+                                    quantity_part = "1"
                     if chat_div:
                         chat_id = chat_div['data-id']
                     else:
@@ -212,6 +232,6 @@ def get_tc_status():
             except Exception as e:
                 print(f"Ошибка при получении chat_id для заказа {tc_order}: {e}")
                 chat_id = None
-            if href and tc_date_time and tc_order and tc_user and tc_status:
-                res_list.append((href, tc_date_time, tc_order, tc_user, tc_status, chat_id))
+            if href and tc_date_time and tc_order and tc_user and tc_status and quantity_part:
+                res_list.append((href, tc_date_time, tc_order, tc_user, tc_status, chat_id, quantity_part))
     return res_list
