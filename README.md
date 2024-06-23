@@ -3,8 +3,8 @@
 - /start (list of commands)
 - /info (all info about account)
 - /status
-- /send_message [id] message
-- /send_image [id] -> Enter -> loading image
+- /send_message [id] message or use /sm
+- /send_image [id] -> Enter -> loading image or use /si
 - /seen
 
 # Lib
@@ -32,8 +32,8 @@ Only the Russian translation. In the program itself. (In the development of addi
 - /start (список команд)
 - /info (вся информация об учетной записи)
 - /status
-- /send_message [id] сообщение
-- /send_image [id]  -> Enter -> Загрузить картинку.
+- /send_message [id] сообщение или используйте /sm
+- /send_image [id]  -> Enter -> Загрузить картинку. или используйте /si
 - /seen - база прочитаных заказов. (seen.cfg)
 
 # Lib
